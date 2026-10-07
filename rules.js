@@ -1,6 +1,38 @@
 // Sugestões de compra. A especificação elétrica final depende do projeto e dos manuais.
 export const GROUPS = ['Parte CA', 'Proteção', 'Aterramento', 'Parte CC', 'Estrutura', 'Equipamentos'];
 
+// Cobre/PVC 70 °C em eletroduto, método B1, 35 °C e um circuito.
+// Capacidades B1: Corfio, tabela 02; fator térmico: tabela 11.
+// Queda de tensão: Corfio, tabela 16, eletroduto não magnético (PVC).
+const AC_SECTIONS = [
+  {mm2: 6, ampacity: [41, 36], drop: [6.03, 7.05], drop3: [5.26, 6.15], conduit: '3/4"'},
+  {mm2: 10, ampacity: [57, 50], drop: [3.62, 4.21], drop3: [3.16, 3.66], conduit: '1"'},
+  {mm2: 16, ampacity: [76, 68], drop: [2.33, 2.69], drop3: [2.03, 2.34], conduit: '1 1/4"'},
+  {mm2: 25, ampacity: [101, 89], drop: [1.51, 1.71], drop3: [1.33, 1.49], conduit: '1 1/2"'},
+  {mm2: 35, ampacity: [125, 110], drop: [1.12, 1.25], drop3: [0.98, 1.09], conduit: '2"'},
+  {mm2: 50, ampacity: [151, 134], drop: [0.85, 0.94], drop3: [0.76, 0.82], conduit: '2"'},
+];
+const BREAKER_RATINGS = [10, 16, 20, 25, 32, 40, 50, 63, 70, 80, 100, 125];
+
+export function sizeAcCircuit(inverterKw, acMetres, connection) {
+  const voltage = connection === 'Mono 127 V' ? 127 : 220;
+  const phases = connection === 'Trifásico' ? 3 : 1;
+  const loaded = phases === 3 ? 3 : 2;
+  const powerFactor = 0.9;
+  const current = inverterKw * 1000 / (voltage * powerFactor * (phases === 3 ? Math.sqrt(3) : 1));
+  for (const candidate of AC_SECTIONS) {
+    const ampacity = candidate.ampacity[loaded - 2] * 0.94;
+    const breaker = BREAKER_RATINGS.find(rating => rating >= current && rating <= ampacity);
+    const table = phases === 3 ? candidate.drop3 : candidate.drop;
+    const mvPerAmpMetre = table[0] + (powerFactor - 0.8) / 0.15 * (table[1] - table[0]);
+    const dropPercent = mvPerAmpMetre * current * acMetres / (10 * voltage);
+    if (breaker && dropPercent <= 4) {
+      return {section: candidate.mm2, conduit: candidate.conduit, current, ampacity, breaker, dropPercent, voltage};
+    }
+  }
+  throw new Error('Percurso ou potência CA fora do dimensionamento simplificado. Solicite projeto elétrico para definir cabos e proteção.');
+}
+
 export function generateMaterials(m) {
   const modules = Number(m.modules);
   const watts = Number(m.watts);
@@ -13,8 +45,9 @@ export function generateMaterials(m) {
   const floors = Math.max(1, Number(m.floors) || 1);
   const ground = Math.max(0, Number(m.ground) || 0);
   const active = m.connection === 'Trifásico' ? 3 : m.connection === 'Mono 127 V' ? 1 : 2;
-  const acSection = inverter >= 5 || ac >= 25 ? 10 : 6;
-  const conduit = acSection === 10 ? '1"' : '3/4"';
+  const acSizing = sizeAcCircuit(inverter, ac, m.connection);
+  const acSection = acSizing.section;
+  const conduit = acSizing.conduit;
   const acLength = Math.ceil(ac * 1.1 + floors);
   const dcLength = Math.ceil(dc * 1.1);
   const acBars = Math.ceil(acLength / 3);
@@ -25,9 +58,9 @@ export function generateMaterials(m) {
   const add = (group, quantity, unit, description, note = '') => items.push({id: crypto.randomUUID(), group, quantity: String(quantity), unit, description, note, source: 'Regra', checked: true});
 
   const conductorNames = active === 1 ? ['fase (preto)', 'neutro (azul)'] : active === 2 ? ['fase (preto)', 'fase (vermelho)'] : ['fase L1', 'fase L2', 'fase L3'];
-  conductorNames.forEach(name => add('Parte CA', acLength, 'm', `Cabo flexível ${acSection} mm², ${name}`, 'Comprimento de percurso com subida, descida e reserva.'));
-  add('Parte CA', acLength, 'm', `Cabo flexível ${acSection} mm², PE (verde)`);
-  add('Parte CA', acBars, 'barras', `Eletroduto PVC rígido ${conduit}, ${sun ? 'preto resistente a UV' : 'branco'}, barra de 3 m`, m.conduit === 'Aparente' ? 'Instalação aparente.' : 'Confirmar trajeto e ocupação.');
+  conductorNames.forEach(name => add('Parte CA', acLength, 'm', `Cabo flexível de cobre PVC 70 °C ${acSection} mm², ${name}`, 'Comprimento de percurso com subida, descida e reserva.'));
+  add('Parte CA', acLength, 'm', `Cabo flexível de cobre PVC 70 °C ${acSection} mm², PE (verde)`);
+  add('Parte CA', acBars, 'barras', `Eletroduto PVC rígido ${conduit}, ${sun ? 'preto resistente a UV' : 'branco'}, barra de 3 m`, 'Pré-seleção: confirmar trajeto, ocupação e diâmetro real dos cabos.');
   add('Parte CA', Math.max(4, Math.ceil(ac / 4) + 1), 'un', `Curva 90° ${conduit}`, 'Contar mudanças de direção no desenho.');
   add('Parte CA', acBars, 'un', `Luva ${conduit}`);
   add('Parte CA', ac > 15 ? 3 : 2, 'un', `Caixa de passagem de sobrepor ${conduit}`);
@@ -38,7 +71,7 @@ export function generateMaterials(m) {
   add('Parte CA', 1, 'm', 'Espiral protetor de cabo');
 
   const poles = active === 3 ? 'tripolar' : active === 2 ? 'bipolar' : 'monopolar';
-  add('Proteção', 1, 'un', `Disjuntor ${poles} curva C, dedicado`, `No ${m.point || 'ponto de conexão'}; corrente conforme manual do inversor e capacidade do cabo.`);
+  add('Proteção', 1, 'un', `Disjuntor ${poles} ${acSizing.breaker} A curva C, dedicado`, `No ${m.point || 'ponto de conexão'}; estimativa com Ib ${acSizing.current.toFixed(1)} A e Iz corrigida ${acSizing.ampacity.toFixed(1)} A. Confirmar corrente máxima e proteção no manual do inversor.`);
   add('Proteção', 1, 'un', 'Etiqueta de identificação do disjuntor');
   add('Proteção', 1, 'un', 'Quadro DIN de sobrepor com porta, 6 módulos', 'Confirmar grau de proteção conforme local.');
   add('Proteção', active, 'un', 'DPS classe II, 275 V, 20 kA / 40 kA', 'Uc e coordenação devem ser conferidos no projeto.');
@@ -73,5 +106,8 @@ export function generateMaterials(m) {
   add('Equipamentos', 1, 'un', 'Módulo Wi-Fi do fabricante');
   add('Equipamentos', 2, 'jogos', 'Parafuso e bucha para fixar inversor e quadro');
 
-  return {items, stats: {kwp: modules * watts / 1000, acLength, dcLength}, warning: `Confira no manual do inversor a corrente de entrada, o Isc do módulo, a Voc de ${modules} módulos em série, a corrente do disjuntor e a seção dos cabos antes de comprar.`};
+  const standardNote = m.point === 'Padrão de entrada'
+    ? ' Padrão: confira pela carga instalada total (NT.00001, tabela 2); 63 A não é mínimo universal.'
+    : '';
+  return {items, stats: {kwp: modules * watts / 1000, acLength, dcLength, acSizing}, warning: `CA ${inverter} kW/${acSizing.voltage} V: Ib ${acSizing.current.toFixed(1)} A, Iz ${acSizing.ampacity.toFixed(1)} A, queda ${acSizing.dropPercent.toFixed(2)}% (limite 4%). Premissas: FP 0,9; cobre/PVC 70 °C; B1; 35 °C; um circuito.${standardNote} Confirme manual e instalação real antes da compra.`};
 }

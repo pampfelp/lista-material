@@ -1,4 +1,4 @@
-import {GROUPS, generateMaterials} from './rules.js?v=20261006b';
+import {GROUPS, generateMaterials} from './rules.js?v=20261007a';
 
 const config = {
   projectId: 'solargreen-21313',

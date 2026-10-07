@@ -13,6 +13,13 @@ Aplicativo estático para gerar, revisar, salvar e imprimir listas de material d
 
 O cálculo produz **sugestões de compra**, não projeto elétrico. Estrutura sem desenho dos blocos fica “conforme layout”. Corrente, tensão, proteção, cabo, string e fixação devem ser conferidos com manuais, projeto e vistoria.
 
+### Critério CA adotado
+
+- Usa a potência nominal do inversor, e não os kWp dos módulos. Considera 127 V fase-neutro no monofásico e 220 V fase-fase no bifásico; para trifásico, 220 V entre fases. O fator de potência adotado é 0,9.
+- Seleciona cabo de cobre com isolação PVC 70 °C, mínimo 6 mm², em eletroduto pelo método B1, a 35 °C e com um circuito. Confere `Ib ≤ In ≤ Iz` e queda de tensão máxima adotada de 4% no percurso informado. A reserva de compra é somada depois e não entra na queda de tensão.
+- Usa capacidades da [tabela 02 da Corfio](https://www.corfio.com.br/pt/area-tecnica/tabela-02), fator térmico da [tabela 11](https://www.corfio.com.br/pt/area-tecnica/tabela-11) e queda de tensão em eletroduto PVC da [tabela 16](https://www.corfio.com.br/pt/area-tecnica/tabela-16), interpolada entre FP 0,8 e 0,95. Diâmetro do eletroduto é pré-seleção e precisa de conferência da ocupação e do cabo real.
+- O disjuntor mostrado é uma estimativa do circuito do inversor. Corrente máxima de saída, proteção exigida pelo fabricante, agrupamento, temperatura real e exposição ao sol precisam ser conferidos no projeto. Para o **padrão de entrada**, a [NT.00001.EQTL, tabela 2](https://pi.equatorialenergia.com.br/wp-content/uploads/2025/12/NT.00001.EQTL-09-Fornecimento-de-Energia-Eletrica-em-Baixa-Tensao.pdf) usa a carga instalada total da unidade: em 127/220 V bifásico até 10 kW, indica 50 A e fase de 10 mm²; de 10,1 a 12 kW, 63 A e fase de 10 mm². O app não conhece a carga total da unidade e não dimensiona o disjuntor geral.
+
 ## Integração
 
 - Firebase: projeto `solargreen-21313`.
