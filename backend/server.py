@@ -103,7 +103,7 @@ def gemini(prompt, photos):
         {"inline_data": {"mime_type": "image/jpeg", "data": image}} for image in photos
     ]}], "generationConfig": {"responseMimeType": "application/json"}}
     data = post_json("https://generativelanguage.googleapis.com/v1beta/models/"
-                     + os.getenv("GEMINI_MODEL", "gemini-2.5-flash") + ":generateContent",
+                     + os.getenv("GEMINI_MODEL", "gemini-3.8-flash") + ":generateContent",
                      payload, {"x-goog-api-key": key})
     return "".join(p.get("text", "") for p in data["candidates"][0]["content"]["parts"])
 
@@ -123,7 +123,7 @@ def claude(prompt, photos):
     key = os.getenv("ANTHROPIC_API_KEY")
     if not key:
         raise RuntimeError("Sem chave Claude.")
-    payload = {"model": os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5"), "max_tokens": 3000,
+    payload = {"model": os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5"), "max_tokens": 3000,
                "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}] + [
                    {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": image}}
                    for image in photos]}]}
