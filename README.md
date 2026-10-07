@@ -39,7 +39,9 @@ O plano gratuito do Render pode hibernar após inatividade; a primeira requisiç
 
 ## Verificação local
 
-Abra por HTTP, por exemplo `python -m http.server 8765`. Testes:
+No Windows, dê duplo clique em `TESTAR - index.html.bat`. Ele inicia o servidor, abre `http://localhost:8765/index.html` no navegador padrão e encerra o servidor quando você pressiona uma tecla na janela do script. O app local usa o mesmo Firebase do ERP; salvar uma lista grava no banco real.
+
+Testes automatizados com o servidor local aberto:
 
 - `node scripts/check-rules.mjs`
 - `node scripts/check-app.cjs` (usa Edge instalado, Playwright disponível no `NODE_PATH` e Firebase simulado; exige servidor na porta 8765)
