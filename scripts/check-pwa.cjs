@@ -13,6 +13,7 @@ const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
   await cdp.send('Page.enable');
   const errors = await cdp.send('Page.getInstallabilityErrors');
   const manifest = await cdp.send('Page.getAppManifest');
+  await page.waitForFunction(async () => (await navigator.serviceWorker.getRegistration())?.active?.state === 'activated');
   const active = await page.evaluate(async () => (await navigator.serviceWorker.getRegistration())?.active?.state);
   if(active!=='activated') throw new Error('Service worker not active: '+active);
   if(errors.installabilityErrors.length) throw new Error('Installability: '+JSON.stringify(errors.installabilityErrors));
