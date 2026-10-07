@@ -117,7 +117,7 @@ function renderItems() {
       const unit = el('input', 'unit-input u');
       unit.value = item.unit;
       unit.setAttribute('aria-label', 'Unidade de ' + item.description);
-      unit.addEventListener('change', () => { item.unit = unit.value.trim(); markEdited(item); });
+      unit.addEventListener('change', () => { item.unit = unit.value.trim(); mobileUnit.value = item.unit; fitMobileUnit(); markEdited(item); });
       const wrap = el('div', 'd-wrap');
       const description = el('textarea', 'd');
       description.rows = 1;
@@ -135,7 +135,13 @@ function renderItems() {
       note.setAttribute('aria-label', 'Observação de ' + item.description);
       note.addEventListener('change', () => { item.note = note.value.trim(); markEdited(item); });
       const source = el('span', 'tag ' + (item.source === 'IA' ? 'ia' : item.source === 'Editado' ? 'e' : 'r'), item.source);
-      const mobileUnit = el('span', 'mobile-unit', item.unit);
+      const mobileUnit = el('input', 'mobile-unit');
+      mobileUnit.value = item.unit;
+      mobileUnit.setAttribute('aria-label', 'Unidade de ' + item.description);
+      const fitMobileUnit = () => { mobileUnit.style.width = Math.max(2, Math.min(14, mobileUnit.value.length + 1)) + 'ch'; };
+      fitMobileUnit();
+      mobileUnit.addEventListener('input', fitMobileUnit);
+      mobileUnit.addEventListener('change', () => { item.unit = mobileUnit.value.trim(); unit.value = item.unit; markEdited(item); });
       const mobileSource = el('span', 'mobile-tag tag ' + (item.source === 'IA' ? 'ia' : item.source === 'Editado' ? 'e' : 'r'), item.source);
       wrap.append(description, mobileUnit, mobileSource, note);
       const remove = el('button', 'del');

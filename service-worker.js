@@ -1,8 +1,8 @@
-const CACHE = 'lista-material-shell-v3';
+const CACHE = 'lista-material-shell-v4';
 const SHELL = [
-  './', './index.html', './style.css?v=20261006c', './app.js?v=20261006c',
-  './rules.js?v=20261006c', './manifest.json?v=20261006c',
-  './logo.svg?v=20261006c', './icon-192.png', './icon-512.png'
+  './', './index.html', './style.css?v=20261006d', './app.js?v=20261006d',
+  './rules.js?v=20261006d', './manifest.json?v=20261006d',
+  './logo.svg?v=20261006d', './icon-192.png', './icon-512.png'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache =>

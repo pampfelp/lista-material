@@ -216,7 +216,7 @@ h1{font-family:'Unbounded';font-weight:900;font-size:44px;line-height:1.04;lette
   .sec.compact-mobile .row:nth-child(n+6){display:none}
   .sec.mobile-coll .rows,.sec.mobile-coll .addi{display:none}
   .mobile-tag{display:inline-block;margin-top:5px}
-  .mobile-unit{display:inline-block;margin:5px 8px 0 0;color:var(--muted);font-size:12px;font-weight:700}
+  .mobile-unit{display:inline-block;width:60px;margin:5px 8px 0 0;padding:0;border:0;outline:0;background:transparent;color:var(--muted);font:700 12px 'Plus Jakarta Sans',sans-serif}
   .row .d{font-size:13px;font-weight:600}
   .desktop-only{display:none}
   .mobile-only{display:inline}

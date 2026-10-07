@@ -55,6 +55,11 @@ window.firebase.firestore.FieldValue={serverTimestamp:()=>new Date()};
     if (overflow) throw new Error('Horizontal overflow at ' + width);
     await page.screenshot({path:path.resolve(__dirname,'../test-results/app-' + width + '.png'),fullPage:true});
     const first = page.locator('.row').first();
+    if (width === 390) {
+      await first.locator('.mobile-unit').fill('barras');
+      await first.locator('.mobile-unit').dispatchEvent('change');
+      if (await first.locator('.u').inputValue() !== 'barras') throw new Error('Mobile unit edit failed');
+    }
     await first.locator('.q').fill('31');
     await first.locator('.q').dispatchEvent('change');
     if (await first.locator('.tag').first().textContent() !== 'Editado') throw new Error('Edit origin missing');
