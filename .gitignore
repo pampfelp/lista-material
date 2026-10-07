@@ -1,0 +1,7 @@
+maquete/
+__pycache__/
+*.pyc
+.env
+.env.*
+playwright-report/
+test-results/
