@@ -107,7 +107,7 @@ export function generateMaterials(m) {
   add('Equipamentos', 2, 'jogos', 'Parafuso e bucha para fixar inversor e quadro');
 
   const standardNote = m.point === 'Padrão de entrada'
-    ? ' Padrão: confira pela carga instalada total (NT.00001, tabela 2); 63 A não é mínimo universal.'
+    ? ' Padrão bifásico: NT.00001, tabela 2, indica fase 10 mm²; disjuntor 50 A até 10 kW ou 63 A de 10,1 a 12 kW de carga instalada total.'
     : '';
   return {items, stats: {kwp: modules * watts / 1000, acLength, dcLength, acSizing}, warning: `CA ${inverter} kW/${acSizing.voltage} V: Ib ${acSizing.current.toFixed(1)} A, Iz ${acSizing.ampacity.toFixed(1)} A, queda ${acSizing.dropPercent.toFixed(2)}% (limite 4%). Premissas: FP 0,9; cobre/PVC 70 °C; B1; 35 °C; um circuito.${standardNote} Confirme manual e instalação real antes da compra.`};
 }

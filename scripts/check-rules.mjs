@@ -13,7 +13,7 @@ assert.equal(qty('Eletroduto PVC rígido 3/4"'), '10');
 assert.equal(qty('Curva 90° 3/4"'), '8');
 assert.equal(qty('Abraçadeira tipo D 3/4"'), '35');
 assert.equal(qty('Disjuntor bipolar 32 A curva C'), '1');
-assert.match(result.warning, /63 A não é mínimo universal/);
+assert.match(result.warning, /fase 10 mm²; disjuntor 50 A até 10 kW ou 63 A/);
 assert.equal(qty('Cabo solar 6 mm², vermelho'), '28');
 assert.equal(qty('Eletroduto PVC rígido preto 3/4"'), '9');
 assert.equal(qty('Fixador para telha de fibrocimento'), '36');
