@@ -1,5 +1,6 @@
 const {chromium} = require('playwright');
 const path = require('path');
+const baseUrl = process.env.APP_URL || 'http://127.0.0.1:8765/';
 
 const firebaseMock = `
 window.firebase = {
@@ -37,7 +38,7 @@ window.firebase.firestore.FieldValue={serverTimestamp:()=>new Date()};
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if(message.type()==='error') console.log('browser:',message.text()); });
     await page.route('https://www.gstatic.com/firebasejs/**', route => route.fulfill({contentType:'application/javascript',body:firebaseMock}));
-    await page.goto('http://127.0.0.1:8765/', {waitUntil:'networkidle'});
+    await page.goto(baseUrl, {waitUntil:'networkidle'});
     try { await page.locator('#app-shell').waitFor({state:'visible',timeout:8000}); }
     catch(e) { console.log('login error:',await page.locator('#login-error').textContent(),'page errors:',errors); throw e; }
     await page.locator('#modules').fill('9');
@@ -63,12 +64,16 @@ window.firebase.firestore.FieldValue={serverTimestamp:()=>new Date()};
   if (errors.length) throw new Error(errors.join('\n'));
   const page = await browser.newPage({viewport:{width:390,height:900}});
   await page.route('https://www.gstatic.com/firebasejs/**', route => route.fulfill({contentType:'application/javascript',body:firebaseMock}));
-  await page.goto('http://127.0.0.1:8765/?clienteId=teste',{waitUntil:'networkidle'});
+  await page.goto(baseUrl + '?clienteId=teste',{waitUntil:'networkidle'});
   await page.getByText('Continuar sem OS').click();
   for(const [id,value] of Object.entries({modules:'9',watts:'620',inverter:'5',ac:'25',dc:'25'})) await page.locator('#'+id).fill(value);
   await page.locator('.gen').click();
   await page.locator('.row').first().locator('.q').fill('33');
   await page.locator('.row').first().locator('.q').dispatchEvent('change');
+  await page.locator('.tabs button[data-tab="photos"]').click();
+  await page.locator('#photo-input').setInputFiles(path.resolve(__dirname,'../icon-192.png'));
+  if(await page.locator('#thumbs .thumb').count()!==1) throw new Error('Photo compression/preview failed');
+  await page.locator('.tabs button[data-tab="list"]').click();
   await page.locator('#save-button').click();
   if(!await page.locator('#status').textContent().then(s=>s.includes('salva'))) throw new Error('Save did not finish');
   await page.reload({waitUntil:'networkidle'});

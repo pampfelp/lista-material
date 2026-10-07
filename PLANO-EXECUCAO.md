@@ -13,7 +13,7 @@ Entregar a tela aprovada em computador e celular, lista base editável, importa�
 5. Gerar PDF a partir da lista editada. Feito; duas páginas inspecionadas.
 6. Preparar PWA e integração de IA com fallback. Código feito; resposta real depende de chaves e Render.
 7. Revisar em 1440/390 px, corrigir diferenças e testar save/reload. Feito com Firebase simulado.
-8. Publicar GitHub Pages e verificar HTTP 200, build e PWA no navegador real. Em execução.
+8. Publicar GitHub Pages e verificar HTTP 200, build e PWA no navegador real. Feito.
 9. Testar login, salvar/reabrir e leitura de foto com conta e chaves reais. Pendente de acesso do proprietário.
 
 ## Revisão e correções

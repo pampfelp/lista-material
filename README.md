@@ -43,6 +43,7 @@ Abra por HTTP, por exemplo `python -m http.server 8765`. Testes:
 
 - `node scripts/check-rules.mjs`
 - `node scripts/check-app.cjs` (usa Edge instalado, Playwright disponível no `NODE_PATH` e Firebase simulado; exige servidor na porta 8765)
+- `node scripts/check-pwa.cjs https://pampfelp.github.io/lista-material/` (perfil persistente do Edge, PWA no endereço público)
 - `python -m unittest backend.test_server`
 
 O teste simulado não confirma login real, regras em produção nem resposta dos provedores. Para esse fechamento, entrar com usuário real no endereço publicado e salvar/reabrir uma lista descartável de teste.
