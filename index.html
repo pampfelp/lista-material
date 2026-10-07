@@ -18,7 +18,7 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script type="module" src="./app.js?v=20261007b"></script>
+  <script type="module" src="./app.js?v=20261007c"></script>
 </head>
 <body>
 <svg class="symbols" aria-hidden="true">
@@ -87,7 +87,8 @@
             <div class="f"><label for="watts">Potência do módulo *</label><div class="inp"><input id="watts" type="number" min="1" step="1" required><em>W</em></div></div>
             <div class="f"><label for="inverter">Inversor *</label><div class="inp"><input id="inverter" type="number" min="0.1" step="0.1" required><em>kW</em></div></div>
             <div class="f"><label for="floors">Andares</label><div class="inp"><input id="floors" type="number" min="1" step="1" value="1"><em>pav.</em></div></div>
-            <div class="f full"><label>Ligação</label><div class="seg" data-field="connection"><button type="button" data-value="Mono 127 V">Mono 127 V</button><button type="button" class="on" data-value="Bifásico 220 V">Bifásico 220 V</button><button type="button" data-value="Trifásico">Trifásico</button></div></div>
+            <div class="f full"><label>Rede no padrão (127/220 V)</label><div class="seg" data-field="connection"><button type="button" data-value="Mono 127 V">Mono 127 V</button><button type="button" class="on" data-value="Bifásico 220 V">Bifásica</button><button type="button" data-value="Trifásico">Trifásica</button></div></div>
+            <div class="f full"><label for="inverter-output">Saída CA do inversor</label><div class="inp"><select id="inverter-output"><option value="Mono 220 V">Monofásico 220 V (entre fases)</option><option value="Mono 127 V">Monofásico 127 V (fase-neutro)</option><option value="Trifásico 220 V">Trifásico 220 V</option></select><svg class="i"><use href="#down"/></svg></div></div>
             <div class="f full"><label for="roof">Telhado</label><div class="inp"><select id="roof"><option>Fibrocimento sobre madeira</option><option>Fibrocimento sobre metal</option><option>Telha cerâmica</option><option>Telha metálica</option><option>Laje</option><option>A conferir</option></select><svg class="i"><use href="#down"/></svg></div></div>
             <div class="f"><label for="ac">Até o ponto de conexão *</label><div class="inp"><input id="ac" type="number" min="0.1" step="0.1" required><em>m</em></div></div>
             <div class="f"><label for="dc">Percurso CC *</label><div class="inp"><input id="dc" type="number" min="0.1" step="0.1" required><em>m</em></div></div>

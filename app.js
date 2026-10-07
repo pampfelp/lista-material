@@ -1,4 +1,4 @@
-import {GROUPS, generateMaterials} from './rules.js?v=20261007b';
+import {GROUPS, generateMaterials} from './rules.js?v=20261007c';
 
 const config = {
   projectId: 'solargreen-21313',
@@ -31,15 +31,18 @@ function setTab(tab) {
 function measureValues() {
   const m = {};
   ['modules', 'watts', 'inverter', 'floors', 'ac', 'dc', 'ground', 'roof'].forEach(id => m[id] = $('#' + id).value);
+  m.inverterOutput = $('#inverter-output').value;
   $$('.seg').forEach(seg => m[seg.dataset.field] = seg.querySelector('.on')?.dataset.value || '');
   return m;
 }
 function fillMeasures(m = {}) {
   ['modules', 'watts', 'inverter', 'floors', 'ac', 'dc', 'ground'].forEach(id => $('#' + id).value = m[id] ?? (id === 'floors' ? 1 : ''));
   if (m.roof) $('#roof').value = m.roof;
+  $('#inverter-output').value = m.inverterOutput || (m.connection === 'Mono 127 V' ? 'Mono 127 V' : m.connection === 'Trifásico' ? 'Trifásico 220 V' : 'Mono 220 V');
   $$('.seg').forEach(seg => {
-    if (!m[seg.dataset.field]) return;
-    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.value === m[seg.dataset.field]));
+    const value = m[seg.dataset.field] || (seg.dataset.field === 'connection' ? 'Bifásico 220 V' : '');
+    if (!value) return;
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.value === value));
   });
 }
 function updateStats() {
@@ -214,7 +217,7 @@ async function loadSavedList() {
     const data = doc.data();
     fillMeasures(data.medidas || {});
     state.items = Array.isArray(data.itens) ? data.itens : [];
-    state.warning = data.aviso || '';
+    state.warning = data.medidas?.inverterOutput ? (data.aviso || '') : `${data.aviso || ''} Lista anterior à separação entre rede e inversor: confirme a saída CA e gere novamente.`.trim();
     state.aiText = data.leituraIA || '';
     state.savedAt = data.atualizadoEm?.toDate?.()?.toISOString() || null;
     $('#ai-read').textContent = state.aiText ? 'O que a IA leu: ' + state.aiText : 'O que a IA leu: adicione fotos e toque em “Ler fotos com IA”.';

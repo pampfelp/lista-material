@@ -14,9 +14,9 @@ const AC_SECTIONS = [
 ];
 const BREAKER_RATINGS = [10, 16, 20, 25, 32, 40, 50, 63, 70, 80, 100, 125];
 
-export function sizeAcCircuit(inverterKw, acMetres, connection) {
-  const voltage = connection === 'Mono 127 V' ? 127 : 220;
-  const phases = connection === 'Trifásico' ? 3 : 1;
+export function sizeAcCircuit(inverterKw, acMetres, inverterOutput) {
+  const voltage = inverterOutput === 'Mono 127 V' ? 127 : 220;
+  const phases = inverterOutput === 'Trifásico 220 V' ? 3 : 1;
   const loaded = phases === 3 ? 3 : 2;
   const powerFactor = 0.9;
   const current = inverterKw * 1000 / (voltage * powerFactor * (phases === 3 ? Math.sqrt(3) : 1));
@@ -44,8 +44,18 @@ export function generateMaterials(m) {
   }
   const floors = Math.max(1, Number(m.floors) || 1);
   const ground = Math.max(0, Number(m.ground) || 0);
-  const active = m.connection === 'Trifásico' ? 3 : m.connection === 'Mono 127 V' ? 1 : 2;
-  const acSizing = sizeAcCircuit(inverter, ac, m.connection);
+  const inverterOutput = m.inverterOutput || (m.connection === 'Mono 127 V' ? 'Mono 127 V' : m.connection === 'Trifásico' ? 'Trifásico 220 V' : 'Mono 220 V');
+  if (!['Mono 127 V', 'Mono 220 V', 'Trifásico 220 V'].includes(inverterOutput) || !['Mono 127 V', 'Bifásico 220 V', 'Trifásico'].includes(m.connection)) {
+    throw new Error('Selecione a rede no padrão e a saída CA do inversor.');
+  }
+  if (inverterOutput === 'Mono 220 V' && m.connection === 'Mono 127 V') {
+    throw new Error('Rede monofásica 127 V não oferece 220 V entre fases para este inversor. Confira o fornecimento e a saída CA do modelo.');
+  }
+  if (inverterOutput === 'Trifásico 220 V' && m.connection !== 'Trifásico') {
+    throw new Error('Inversor trifásico exige rede trifásica compatível. Confira o fornecimento antes de gerar a lista.');
+  }
+  const active = inverterOutput === 'Trifásico 220 V' ? 3 : inverterOutput === 'Mono 127 V' ? 1 : 2;
+  const acSizing = sizeAcCircuit(inverter, ac, inverterOutput);
   const acSection = acSizing.section;
   const conduit = acSizing.conduit;
   const acLength = Math.ceil(ac * 1.1 + floors);
@@ -54,6 +64,8 @@ export function generateMaterials(m) {
   const dcBars = Math.ceil(dcLength / 3);
   const roof = String(m.roof || 'A conferir');
   const sun = m.sun === 'Sim';
+  const inverterLabel = inverterOutput === 'Trifásico 220 V' ? 'trifásico 220 V' : inverterOutput === 'Mono 127 V' ? 'monofásico 127 V' : 'monofásico 220 V entre fases';
+  const networkLabel = m.connection === 'Trifásico' ? 'trifásica 127/220 V' : m.connection === 'Mono 127 V' ? 'monofásica 127 V' : 'bifásica 127/220 V';
   const items = [];
   const add = (group, quantity, unit, description, note = '') => items.push({id: crypto.randomUUID(), group, quantity: String(quantity), unit, description, note, source: 'Regra', checked: true});
 
@@ -102,12 +114,12 @@ export function generateMaterials(m) {
   add('Estrutura', modules * 4, 'un', 'Vedação dos pontos de fixação');
 
   add('Equipamentos', modules, 'un', `Módulo fotovoltaico ${watts} W`);
-  add('Equipamentos', 1, 'un', `Inversor on-grid ${String(inverter).replace('.', ',')} kW`, 'Conferir tensão, Isc e Voc da string nos manuais.');
+  add('Equipamentos', 1, 'un', `Inversor on-grid ${String(inverter).replace('.', ',')} kW, ${inverterLabel}`, 'Conferir tensão, Isc e Voc da string nos manuais.');
   add('Equipamentos', 1, 'un', 'Módulo Wi-Fi do fabricante');
   add('Equipamentos', 2, 'jogos', 'Parafuso e bucha para fixar inversor e quadro');
 
-  const standardNote = m.point === 'Padrão de entrada'
+  const standardNote = m.point !== 'Padrão de entrada' ? '' : m.connection === 'Bifásico 220 V'
     ? ' Padrão bifásico: NT.00001, tabela 2, indica fase 10 mm²; disjuntor 50 A até 10 kW ou 63 A de 10,1 a 12 kW de carga instalada total.'
-    : '';
-  return {items, stats: {kwp: modules * watts / 1000, acLength, dcLength, acSizing}, warning: `CA ${inverter} kW/${acSizing.voltage} V: Ib ${acSizing.current.toFixed(1)} A, Iz ${acSizing.ampacity.toFixed(1)} A, queda ${acSizing.dropPercent.toFixed(2)}% (limite 4%). Premissas: FP 0,9; cobre/PVC 70 °C; B1; 35 °C; um circuito.${standardNote} Confirme manual e instalação real antes da compra.`};
+    : ' Padrão: disjuntor geral e fase dependem da carga instalada total (NT.00001, tabela 2).';
+  return {items, stats: {kwp: modules * watts / 1000, acLength, dcLength, acSizing}, warning: `Inversor ${inverterLabel}; rede ${networkLabel}: Ib ${acSizing.current.toFixed(1)} A, Iz ${acSizing.ampacity.toFixed(1)} A, queda ${acSizing.dropPercent.toFixed(2)}% (limite 4%). Premissas: FP 0,9; cobre/PVC 70 °C; B1; 35 °C; um circuito.${standardNote} Confirme bornes CA no manual e instalação real antes da compra.`};
 }
