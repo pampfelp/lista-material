@@ -135,7 +135,7 @@ function renderItems() {
       note.setAttribute('aria-label', 'Observação de ' + item.description);
       note.addEventListener('change', () => { item.note = note.value.trim(); markEdited(item); });
       const source = el('span', 'tag ' + (item.source === 'IA' ? 'ia' : item.source === 'Editado' ? 'e' : 'r'), item.source);
-      const mobileUnit = el('span', 'mobile-unit', ' · ' + item.unit);
+      const mobileUnit = el('span', 'mobile-unit', item.unit);
       const mobileSource = el('span', 'mobile-tag tag ' + (item.source === 'IA' ? 'ia' : item.source === 'Editado' ? 'e' : 'r'), item.source);
       wrap.append(description, mobileUnit, mobileSource, note);
       const remove = el('button', 'del');

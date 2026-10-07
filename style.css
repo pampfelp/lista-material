@@ -215,8 +215,8 @@ h1{font-family:'Unbounded';font-weight:900;font-size:44px;line-height:1.04;lette
   .row .del{grid-column:4;grid-row:1}
   .sec.compact-mobile .row:nth-child(n+6){display:none}
   .sec.mobile-coll .rows,.sec.mobile-coll .addi{display:none}
-  .mobile-tag{display:table;margin-top:5px}
-  .mobile-unit{display:inline;color:var(--muted);font-size:12px}
+  .mobile-tag{display:inline-block;margin-top:5px}
+  .mobile-unit{display:inline-block;margin:5px 8px 0 0;color:var(--muted);font-size:12px;font-weight:700}
   .row .d{font-size:13px;font-weight:600}
   .desktop-only{display:none}
   .mobile-only{display:inline}

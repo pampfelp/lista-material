@@ -72,6 +72,7 @@ window.firebase.firestore.FieldValue={serverTimestamp:()=>new Date()};
   await page.locator('.row').first().locator('.q').dispatchEvent('change');
   await page.locator('.tabs button[data-tab="photos"]').click();
   await page.locator('#photo-input').setInputFiles(path.resolve(__dirname,'../icon-192.png'));
+  await page.locator('#thumbs .thumb').waitFor({state:'visible',timeout:5000});
   if(await page.locator('#thumbs .thumb').count()!==1) throw new Error('Photo compression/preview failed');
   await page.locator('.tabs button[data-tab="list"]').click();
   await page.locator('#save-button').click();
